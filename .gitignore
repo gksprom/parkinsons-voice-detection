@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+.Python
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Audio data (too large for git, download separately - see README)
+data/iyer/HC_AH/
+data/iyer/PD_AH/
+data/iyer/demographics.xlsx
+data/mdvr_kcl/26-29_09_2017_KCL/
+data/uci/pd_speech_features.csv
+data/*.png
+
+# Temporary files
+*.tmp
+*.log
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Keep extracted features CSV (small, lets others reproduce models)
+!data/iyer/iyer_features_8khz.csv
+!data/iyer/iyer_features.csv
+!data/mdvr_kcl/mdvr_features.csv
+
+# Flask
+instance/
+flask_session/

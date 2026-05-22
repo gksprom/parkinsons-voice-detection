@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Parkinson's Voice Detection</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 780px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f7f8fa;
+            color: #222;
+            line-height: 1.5;
+        }
+        h1 { color: #2c3e50; margin-bottom: 4px; }
+        .subtitle { color: #7f8c8d; margin-top: 0; font-size: 14px; }
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            margin-bottom: 18px;
+        }
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .step-num {
+            background: #2c3e50;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .step-num.done { background: #27ae60; }
+        .step-num.active { background: #3498db; }
+        h2 { margin: 0; font-size: 18px; color: #2c3e50; }
+        button {
+            background: #2c3e50; color: white; border: none;
+            padding: 10px 22px; font-size: 15px; border-radius: 5px;
+            cursor: pointer; margin-right: 8px;
+        }
+        button:hover { background: #34495e; }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; }
+        button.recording { background: #c0392b; }
+        button.secondary { background: #95a5a6; }
+        .status { margin-top: 12px; color: #555; font-size: 13px; min-height: 18px; }
+        .status.error { color: #c0392b; }
+        .reading-text {
+            background: #ecf0f1;
+            padding: 16px;
+            border-radius: 6px;
+            margin: 12px 0;
+            font-size: 16px;
+            line-height: 1.6;
+            border-left: 3px solid #3498db;
+        }
+        .step-content { padding-left: 44px; }
+        .step.collapsed .step-content { display: none; }
+        audio { width: 100%; margin: 10px 0; }
+        .prob-display {
+            font-size: 42px; font-weight: bold; text-align: center;
+            color: #2c3e50; margin: 10px 0;
+        }
+        .gauge {
+            background: linear-gradient(to right, #27ae60 0%, #f39c12 50%, #c0392b 100%);
+            height: 22px; border-radius: 11px; position: relative; margin: 16px 0 6px;
+        }
+        .gauge-marker {
+            position: absolute; top: -7px; width: 4px; height: 36px;
+            background: #2c3e50; border-radius: 2px;
+        }
+        .gauge-labels { display: flex; justify-content: space-between; font-size: 11px; color: #666; }
+        .interpretation {
+            padding: 14px; border-radius: 6px; margin: 14px 0;
+            font-size: 14px;
+        }
+        .interpretation .bin-label {
+            font-weight: bold; font-size: 16px; margin-bottom: 4px;
+        }
+        .interp-low { background: #d4efdf; color: #1e8449; }
+        .interp-mid { background: #fdebd0; color: #b9770e; }
+        .interp-high { background: #fadbd8; color: #922b21; }
+        .breakdown {
+            background: #f8f9fa; padding: 12px; border-radius: 6px;
+            font-size: 13px; margin-top: 12px;
+        }
+        .breakdown table { width: 100%; }
+        .breakdown td { padding: 4px 0; }
+        .breakdown td:last-child { text-align: right; font-weight: 500; font-family: monospace; }
+        .explanation {
+            margin-top: 16px;
+            background: #f1f8f4;
+            padding: 14px;
+            border-radius: 6px;
+            border-left: 3px solid #3498db;
+        }
+        .explanation h3 { margin: 0 0 10px 0; font-size: 14px; color: #2c3e50; }
+        .feat-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 8px;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e6e9;
+            font-size: 12px;
+        }
+        .feat-row:last-child { border-bottom: none; }
+        .feat-name { font-weight: 500; }
+        .feat-bar-wrap {
+            width: 200px;
+            position: relative;
+            height: 14px;
+            background: #e0e6e9;
+            border-radius: 3px;
+        }
+        .feat-dot-hc {
+            position: absolute; top: 2px; width: 10px; height: 10px;
+            background: #27ae60; border-radius: 50%;
+            margin-left: -5px; box-shadow: 0 0 0 2px white;
+        }
+        .feat-dot-pd {
+            position: absolute; top: 2px; width: 10px; height: 10px;
+            background: #c0392b; border-radius: 50%;
+            margin-left: -5px; box-shadow: 0 0 0 2px white;
+        }
+        .feat-marker {
+            position: absolute; top: -3px; width: 3px; height: 20px;
+            background: #2c3e50; border-radius: 1px;
+        }
+        .feat-mini { font-size: 10px; color: #7f8c8d; display: flex; justify-content: space-between; margin-top: 2px; }
+        .shap-impact {
+            font-family: monospace; font-size: 11px;
+            padding: 2px 6px; border-radius: 3px; min-width: 50px; text-align: center;
+        }
+        .shap-pd { background: #fadbd8; color: #922b21; }
+        .shap-hc { background: #d4efdf; color: #1e8449; }
+        .quality-box {
+            margin: 12px 0;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            border-left: 4px solid;
+        }
+        .quality-good { background: #d4efdf; border-color: #27ae60; color: #1e8449; }
+        .quality-fair { background: #fdebd0; border-color: #f39c12; color: #b9770e; }
+        .quality-poor { background: #fadbd8; border-color: #c0392b; color: #922b21; }
+        .quality-warnings { margin-top: 8px; font-size: 12px; }
+        .quality-warnings li { margin: 4px 0; }
+        .quality-metrics { font-family: monospace; font-size: 11px; margin-top: 6px; color: #555; }
+        .disclaimer {
+            background: #fef5e7; border-left: 3px solid #f39c12;
+            padding: 11px 15px; font-size: 12px; color: #784900;
+            border-radius: 4px; margin-top: 16px; line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Parkinson's Voice Detection</h1>
+    <p class="subtitle">3-model ensemble · UCI + Iyer 2023 + MDVR-KCL · 10-bin clinical scoring</p>
+
+    <!-- STEP 1: Sustained vowel -->
+    <div class="card step" id="step1">
+        <div class="step-header">
+            <div class="step-num active" id="step1-num">1</div>
+            <h2>Παρατεταμένο φωνήεν "αααα"</h2>
+        </div>
+        <div class="step-content">
+            <p>Πάτησε <b>Record</b>, πες ένα σταθερό <b>"αααα"</b> για ~5 δευτερόλεπτα, και πάτησε <b>Stop</b>.</p>
+            <button id="rec1Btn">Record</button>
+            <button id="stop1Btn" disabled>Stop</button>
+            <div class="status" id="status1">Έτοιμο</div>
+            <audio id="player1" controls style="display:none;"></audio>
+            <div id="result1" style="display:none;">
+                <div id="quality1"></div>
+                <div class="breakdown">
+                    <table>
+                        <tr><td>UCI balanced — Random Forest</td><td id="r1-uci-rf"></td></tr>
+                        <tr><td>UCI balanced — SVM</td><td id="r1-uci-svm"></td></tr>
+                        <tr><td><i>UCI ensemble (RF+SVM)</i></td><td id="r1-uci"></td></tr>
+                        <tr><td>Iyer 8kHz — Random Forest</td><td id="r1-iyer-rf"></td></tr>
+                        <tr><td>Iyer 8kHz — SVM</td><td id="r1-iyer-svm"></td></tr>
+                        <tr><td><i>Iyer ensemble (RF+SVM)</i></td><td id="r1-iyer"></td></tr>
+                        <tr><td><b>Vowel combined</b></td><td id="r1-combined"><b></b></td></tr>
+                    </table>
+                </div>
+                <div class="explanation">
+                    <h3>Γιατί; Top 5 features (UCI model)</h3>
+                    <div id="uci-features"></div>
+                </div>
+                <div class="explanation">
+                    <h3>Γιατί; Top 5 features (Iyer model)</h3>
+                    <div id="iyer-features"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 2: Reading text -->
+    <div class="card step" id="step2">
+        <div class="step-header">
+            <div class="step-num" id="step2-num">2</div>
+            <h2>Ανάγνωση κειμένου</h2>
+        </div>
+        <div class="step-content">
+            <p>Διάβασε το παρακάτω κείμενο σε φυσικό ρυθμό:</p>
+            <div class="reading-text">{{ reading_text }}</div>
+            <button id="rec2Btn" disabled>Record</button>
+            <button id="stop2Btn" disabled>Stop</button>
+            <div class="status" id="status2">Ολοκλήρωσε πρώτα το Step 1</div>
+            <audio id="player2" controls style="display:none;"></audio>
+        </div>
+    </div>
+
+    <!-- FINAL RESULT -->
+    <div class="card" id="finalCard" style="display:none;">
+        <h2 style="margin-top:0;">Τελικό αποτέλεσμα</h2>
+        <div id="quality2"></div>
+        <div style="text-align:center; color:#7f8c8d; font-size:13px;">Συνολική πιθανότητα ένδειξης Πάρκινσον</div>
+        <div class="prob-display" id="finalProb">--</div>
+        <div class="gauge">
+            <div class="gauge-marker" id="finalMarker" style="left: 0%"></div>
+        </div>
+        <div class="gauge-labels">
+            <span>0%</span><span>50%</span><span>100%</span>
+        </div>
+
+        <div class="interpretation" id="finalInterp"></div>
+
+        <div id="agreementBox"></div>
+
+        <div class="breakdown">
+            <b>Ανάλυση ανά dataset</b> (UCI: 25%, Iyer: 25%, MDVR: 50% — κάθε dataset = ensemble RF+SVM):
+            <table>
+                <tr><td>UCI-balanced (αααα) – 25%</td><td id="b-uci"></td></tr>
+                <tr><td>Iyer 8kHz (αααα) – 25%</td><td id="b-iyer"></td></tr>
+                <tr><td>MDVR (ανάγνωση) – 50%</td><td id="b-mdvr"></td></tr>
+                <tr><td><b>Τελικός σταθμισμένος μέσος</b></td><td id="b-final"></td></tr>
+            </table>
+        </div>
+
+        <div class="breakdown" style="font-size:12px; margin-top:8px;">
+            <b>Per-model breakdown (RF vs SVM):</b>
+            <table>
+                <tr><td>UCI — RF</td><td id="b-uci-rf"></td><td>UCI — SVM</td><td id="b-uci-svm"></td></tr>
+                <tr><td>Iyer — RF</td><td id="b-iyer-rf"></td><td>Iyer — SVM</td><td id="b-iyer-svm"></td></tr>
+                <tr><td>MDVR — RF</td><td id="b-mdvr-rf"></td><td>MDVR — SVM</td><td id="b-mdvr-svm"></td></tr>
+            </table>
+        </div>
+
+        <div class="explanation">
+            <h3>Γιατί; Top 5 features (MDVR model - ανάγνωση)</h3>
+            <div id="mdvr-features"></div>
+        </div>
+
+        <button onclick="location.reload()" class="secondary" style="margin-top:16px;">Νέα ηχογράφηση</button>
+    </div>
+
+    <div class="disclaimer">
+        Αυτή είναι σχολική εργασία, όχι ιατρικό εργαλείο. Τα μοντέλα έχουν εκπαιδευτεί
+        σε ανοιχτά datasets (UCI Sakar 2019, Iyer 2023, MDVR-KCL Jaeger 2019) με periorismeno αριθμό
+        δειγμάτων. Δεν αντικαθιστά κλινική διάγνωση.
+    </div>
+
+    <script src="{{ url_for('static', filename='recorder.js') }}"></script>
+</body>
+</html>
