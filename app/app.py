@@ -66,12 +66,13 @@ mdvr_explainer = ModelExplainer(mdvr_model, mdvr_df[FEATURE_NAMES].values,
                                  mdvr_df['class'].values, FEATURE_NAMES)
 print('SHAP explainers ready')
 
-# Ελληνικό κείμενο για ανάγνωση (Part 2)
+# Reading passage για Part 2 — απόσπασμα από "The North Wind and the Sun"
+# (classic phonetic passage που χρησιμοποιείται σε speech research, IPA standard).
 GREEK_READING_TEXT = (
-    'Η ομιλία μου σήμερα είναι σταθερή και καθαρή. '
-    'Παρακολουθώ τη φωνή μου ενώ διαβάζω αυτό το κείμενο. '
-    'Μιλάω με την κανονική μου ένταση και τόνο. '
-    'Η άνοιξη φέρνει χρώματα, ζωή και αναγέννηση σε όλη τη φύση.'
+    'The North Wind and the Sun were disputing which was the stronger, '
+    'when a traveler came along wrapped in a warm cloak. '
+    'They agreed that the one who first succeeded in making the traveler '
+    'take off his cloak should be considered stronger than the other.'
 )
 
 
