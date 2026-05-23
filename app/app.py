@@ -35,7 +35,7 @@ uci_model_rf = joblib.load(MODELS_DIR / 'uci_balanced_noint.joblib')
 iyer_model_rf = joblib.load(MODELS_DIR / 'iyer_8khz.joblib')
 mdvr_model_rf = joblib.load(MODELS_DIR / 'mdvr_model.joblib')
 
-# SVM models (απαίτηση εκφώνησης)
+# SVM models
 uci_model_svm = joblib.load(MODELS_DIR / 'uci_balanced_noint_svm.joblib')
 iyer_model_svm = joblib.load(MODELS_DIR / 'iyer_8khz_svm.joblib')
 mdvr_model_svm = joblib.load(MODELS_DIR / 'mdvr_svm.joblib')
@@ -220,7 +220,7 @@ def predict_reading():
         # Combine vowel + reading για final
         if 'vowel' in session:
             vowel_combined = session['vowel']['combined']
-            # ΣΗΜΑΝΤΙΚΟ: MDVR έχει σωστό clinical HNR pattern (HC>PD).
+            # Παρατήρηση: MDVR παρουσιάζει σωστό clinical HNR pattern (HC > PD).
             # Iyer έχει inverse HNR (HC<PD, dataset bias).
             # MDVR είναι πιο αξιόπιστο για κλινική νοοτροπία, οπότε 50/50.
             final = vowel_combined * 0.5 + probs['mdvr'] * 0.5

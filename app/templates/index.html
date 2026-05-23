@@ -173,7 +173,7 @@
             <h2>Παρατεταμένο φωνήεν "αααα"</h2>
         </div>
         <div class="step-content">
-            <p>Πάτησε <b>Record</b>, πες ένα σταθερό <b>"αααα"</b> για ~5 δευτερόλεπτα, και πάτησε <b>Stop</b>.</p>
+            <p>Πατάμε Record, εκφωνούμε ένα σταθερό "αααα" για περίπου 5 δευτερόλεπτα και στη συνέχεια Stop.</p>
             <button id="rec1Btn">Record</button>
             <button id="stop1Btn" disabled>Stop</button>
             <div class="status" id="status1">Έτοιμο</div>
@@ -210,11 +210,11 @@
             <h2>Reading task (English)</h2>
         </div>
         <div class="step-content">
-            <p>Διάβασε το παρακάτω κείμενο στα Αγγλικά σε φυσικό ρυθμό:</p>
+            <p>Διαβάζουμε το παρακάτω κείμενο στα Αγγλικά σε φυσικό ρυθμό:</p>
             <div class="reading-text">{{ reading_text }}</div>
             <button id="rec2Btn" disabled>Record</button>
             <button id="stop2Btn" disabled>Stop</button>
-            <div class="status" id="status2">Ολοκλήρωσε πρώτα το Step 1</div>
+            <div class="status" id="status2">Ολοκληρώνουμε πρώτα το Step 1</div>
             <audio id="player2" controls style="display:none;"></audio>
         </div>
     </div>
@@ -264,9 +264,9 @@
     </div>
 
     <div class="disclaimer">
-        Αυτή είναι σχολική εργασία, όχι ιατρικό εργαλείο. Τα μοντέλα έχουν εκπαιδευτεί
-        σε ανοιχτά datasets (UCI Sakar 2019, Iyer 2023, MDVR-KCL Jaeger 2019) με periorismeno αριθμό
-        δειγμάτων. Δεν αντικαθιστά κλινική διάγνωση.
+        Πρόκειται για σχολική εργασία και όχι για ιατρικό εργαλείο. Τα μοντέλα έχουν εκπαιδευτεί
+        σε ανοιχτά datasets (UCI Sakar 2019, Iyer 2023, MDVR-KCL Jaeger 2019) με περιορισμένο αριθμό
+        δειγμάτων. Η εφαρμογή δεν αντικαθιστά κλινική διάγνωση.
     </div>
 
     <script src="{{ url_for('static', filename='recorder.js') }}"></script>

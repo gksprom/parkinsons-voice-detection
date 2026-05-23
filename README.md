@@ -106,4 +106,4 @@ Iyer dataset ηχογραφήθηκε σε **8 kHz** (telephone quality). Browse
 
 ## License
 
-Σχολική εργασία. Datasets έχουν τις δικές τους άδειες (δες παραπάνω links).
+Σχολική εργασία. Τα datasets διέπονται από τις δικές τους άδειες (βλ. παραπάνω links).

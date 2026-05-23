@@ -37,22 +37,22 @@ def preprocess_audio(
     """Preprocess WAV file. Επιστρέφει path του processed αρχείου ή numpy array.
 
     Steps:
-    1. Load + resample σε target_sr, force mono
-    2. Noise reduction (spectral gating, χρησιμοποιεί τα πρώτα 0.5s ως noise sample)
+    1. Load και resample σε target_sr, force mono
+    2. Noise reduction (spectral gating με αυτόματη ανίχνευση σιωπηλών frames)
     3. Silence trim (start + end, ευρετική με top_db)
     4. RMS normalization σε target_rms_db
-    5. Peak clip σε [-1, 1]
-    6. Save ως WAV
+    5. Peak clip στο διάστημα [-1, 1]
+    6. Αποθήκευση ως WAV
     """
     y, sr = librosa.load(str(wav_path), sr=target_sr, mono=True)
 
     if len(y) == 0:
         raise ValueError(f'Empty audio: {wav_path}')
 
-    # 1. Aggressive 2-pass noise reduction για να βγει το mic noise floor.
+    # 1. Aggressive 2-pass noise reduction για την αφαίρεση του mic noise floor
     if apply_noise_reduction:
         try:
-            # Pass 1: αυτόματη ανίχνευση σιωπής → stationary noise reduction
+            # Pass 1: αυτόματη ανίχνευση σιωπής και stationary noise reduction
             intervals = librosa.effects.split(y, top_db=20, frame_length=2048, hop_length=512)
             silent_mask = np.ones(len(y), dtype=bool)
             for start, end in intervals:
@@ -62,10 +62,10 @@ def preprocess_audio(
             if len(noise_sample) > sr * 0.15:
                 y = nr.reduce_noise(
                     y=y, sr=sr, y_noise=noise_sample,
-                    stationary=True, prop_decrease=0.9,  # ↑ από 0.7
+                    stationary=True, prop_decrease=0.9,
                 )
 
-            # Pass 2: non-stationary για να πιάσει residual θόρυβο
+            # Pass 2: non-stationary για residual θόρυβο
             y = nr.reduce_noise(y=y, sr=sr, stationary=False, prop_decrease=0.6)
         except Exception as e:
             print(f'Noise reduction failed, skipping: {e}')
@@ -146,7 +146,7 @@ def assess_recording_quality(wav_path):
         warnings.append({
             'level': 'critical',
             'text': f'Πολύ χαμηλό HNR ({hnr_db:.1f} dB). Η φωνή χάνεται μέσα στο θόρυβο. '
-                    'Πήγαινε σε πιο ήσυχο μέρος ή κάνε το mic πιο κοντά.'
+                    'Συνιστάται πιο ήσυχο περιβάλλον ή πιο κοντινή τοποθέτηση του μικροφώνου.'
         })
     elif hnr_db < 10:
         score -= 20
@@ -159,7 +159,7 @@ def assess_recording_quality(wav_path):
         score -= 25
         warnings.append({
             'level': 'critical',
-            'text': f'Πολύ σιγανή φωνή ({rms_db:.1f} dB RMS). Μίλα πιο δυνατά ή πλησίασε το mic.'
+            'text': f'Πολύ χαμηλή ένταση φωνής ({rms_db:.1f} dB RMS). Απαιτείται μεγαλύτερη ένταση ή πιο κοντινή τοποθέτηση του μικροφώνου.'
         })
     elif rms_db < -28:
         score -= 10
@@ -172,7 +172,7 @@ def assess_recording_quality(wav_path):
         score -= 15
         warnings.append({
             'level': 'warning',
-            'text': f'Λίγη ομιλία ({voiced_ratio*100:.0f}% voiced). Μίλα συνεχόμενα.'
+            'text': f'Λίγη ομιλία ({voiced_ratio*100:.0f}% voiced frames). Απαιτείται συνεχής εκφώνηση.'
         })
 
     if duration < 3:

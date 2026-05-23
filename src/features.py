@@ -54,7 +54,7 @@ def validate_audio(wav_path, min_duration=1.5, min_rms_db=-50, min_voiced_ratio=
     rms_db = 20 * np.log10(rms + 1e-10)
     if rms_db < min_rms_db:
         raise AudioQualityError(
-            f'Δεν εντοπίστηκε ήχος (RMS {rms_db:.1f} dB). Μίλα πιο δυνατά ή πιο κοντά στο μικρόφωνο.'
+            f'Δεν εντοπίστηκε ήχος (RMS {rms_db:.1f} dB). Απαιτείται μεγαλύτερη ένταση φωνής ή πιο κοντινή τοποθέτηση του μικροφώνου.'
         )
 
     # Voiced frame ratio: πόσα frames έχουν detectable pitch
@@ -65,7 +65,7 @@ def validate_audio(wav_path, min_duration=1.5, min_rms_db=-50, min_voiced_ratio=
     if voiced_ratio < min_voiced_ratio:
         raise AudioQualityError(
             f'Δεν εντοπίστηκε αρκετή φωνή ({voiced_ratio*100:.0f}% voiced frames). '
-            f'Πες ένα σταθερό "αααα" χωρίς διακοπές.'
+            f'Απαιτείται ένα σταθερό "αααα" χωρίς διακοπές.'
         )
 
     return {'duration': duration, 'rms_db': rms_db, 'voiced_ratio': voiced_ratio}

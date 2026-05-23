@@ -39,9 +39,9 @@ async function startRecording(step) {
                 channelCount: 1,
                 sampleRate: 44100,
                 echoCancellation: false,
-                autoGainControl: false,    // ΚΛΕΙΣΤΌ: AGC αλλάζει amplitude δυναμικά,
-                                            // καταστρέφει την αρμονική σταθερότητα → χαμηλό HNR
-                noiseSuppression: false,   // ΚΛΕΙΣΤΌ: NS αφαιρεί φασματικές περιοχές,
+                autoGainControl: false,    // Απενεργοποιημένο: το AGC μεταβάλλει
+                                            // το amplitude και αλλοιώνει την αρμονική σταθερότητα
+                noiseSuppression: false,   // Απενεργοποιημένο: το NS αφαιρεί φασματικές περιοχές,
                                             // δημιουργεί τεχνητές discontinuities
             }
         });
@@ -58,7 +58,7 @@ async function startRecording(step) {
         el.rec.disabled = true;
         el.rec.classList.add('recording');
         el.stop.disabled = false;
-        el.status.textContent = step === 1 ? 'Recording... Πες "αααα"' : 'Recording... διάβασε το κείμενο';
+        el.status.textContent = step === 1 ? 'Recording... εκφωνούμε "αααα"' : 'Recording... διαβάζουμε το κείμενο';
         el.status.classList.remove('error');
     } catch (err) {
         el.status.textContent = 'Error: ' + err.message;
@@ -190,7 +190,7 @@ function renderFeatures(containerId, features) {
     // Legend
     const legend = document.createElement('div');
     legend.style.cssText = 'font-size: 10px; color: #7f8c8d; margin-top: 10px; line-height: 1.6;';
-    legend.innerHTML = '🟢 HC μέσος · 🔴 PD μέσος · ⬛ η τιμή σου<br>SHAP: <span class="shap-impact shap-pd">+x</span> = το μοντέλο σπρώχνει την πρόβλεψη προς PD · <span class="shap-impact shap-hc">-x</span> = προς HC<br><i>Σημ: το SHAP δεν είναι μόνο "απόσταση από μέσο όρο" — αντικατοπτρίζει πώς το μοντέλο χρησιμοποιεί το feature στην απόφαση. Η τιμή σου μπορεί να είναι εκτός HC και PD range αλλά το μοντέλο έχει μάθει να ερμηνεύει κάτι extreme ως PD-like.</i>';
+    legend.innerHTML = '🟢 HC μέσος · 🔴 PD μέσος · ⬛ η μετρούμενη τιμή<br>SHAP: <span class="shap-impact shap-pd">+x</span> = το μοντέλο μετατοπίζει την πρόβλεψη προς PD · <span class="shap-impact shap-hc">-x</span> = προς HC<br><i>Σημείωση: η τιμή SHAP δεν αντικατοπτρίζει απλώς την απόσταση από τον μέσο όρο, αλλά τον τρόπο που το μοντέλο χρησιμοποιεί το feature στην απόφαση. Όταν η τιμή βρίσκεται εκτός του εύρους HC και PD, το μοντέλο τείνει να την ερμηνεύσει ως PD-like.</i>';
     el.appendChild(legend);
 }
 
